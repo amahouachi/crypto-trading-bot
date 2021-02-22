@@ -11,43 +11,43 @@ const Mail = require('../notify/mail');
 const Telegram = require('../notify/telegram');
 
 const Tickers = require('../storage/tickers');
-const Ta = require('../modules/ta.js');
+const Ta = require('./ta.js');
 
-const TickListener = require('../modules/listener/tick_listener');
-const CreateOrderListener = require('../modules/listener/create_order_listener');
-const TickerDatabaseListener = require('../modules/listener/ticker_database_listener');
-const ExchangeOrderWatchdogListener = require('../modules/listener/exchange_order_watchdog_listener');
-const ExchangePositionWatcher = require('../modules/exchange/exchange_position_watcher');
+const TickListener = require('./listener/tick_listener');
+const CreateOrderListener = require('./listener/create_order_listener');
+const TickerDatabaseListener = require('./listener/ticker_database_listener');
+const ExchangeOrderWatchdogListener = require('./listener/exchange_order_watchdog_listener');
+const ExchangePositionWatcher = require('./exchange/exchange_position_watcher');
 
-const SignalLogger = require('../modules/signal/signal_logger');
-const SignalHttp = require('../modules/signal/signal_http');
+const SignalLogger = require('./signal/signal_logger');
+const SignalHttp = require('./signal/signal_http');
 
-const SignalRepository = require('../modules/repository/signal_repository');
-const CandlestickRepository = require('../modules/repository/candlestick_repository');
+const SignalRepository = require('./repository/signal_repository');
+const CandlestickRepository = require('./repository/candlestick_repository');
 const StrategyManager = require('./strategy/strategy_manager');
 const ExchangeManager = require('./exchange/exchange_manager');
 
-const Trade = require('../modules/trade');
-const Http = require('../modules/http');
-const Backtest = require('../modules/backtest');
-const Backfill = require('../modules/backfill');
+const Trade = require('./trade');
+const Http = require('./http');
+const Backtest = require('./backtest');
+const Backfill = require('./backfill');
 
-const StopLossCalculator = require('../modules/order/stop_loss_calculator');
-const RiskRewardRatioCalculator = require('../modules/order/risk_reward_ratio_calculator');
-const PairsHttp = require('../modules/pairs/pairs_http');
-const OrderExecutor = require('../modules/order/order_executor');
-const OrderCalculator = require('../modules/order/order_calculator');
-const PairStateManager = require('../modules/pairs/pair_state_manager');
-const PairStateExecution = require('../modules/pairs/pair_state_execution');
-const PairConfig = require('../modules/pairs/pair_config');
-const SystemUtil = require('../modules/system/system_util');
+const StopLossCalculator = require('./order/stop_loss_calculator');
+const RiskRewardRatioCalculator = require('./order/risk_reward_ratio_calculator');
+const PairsHttp = require('./pairs/pairs_http');
+const OrderExecutor = require('./order/order_executor');
+const OrderCalculator = require('./order/order_calculator');
+const PairStateManager = require('./pairs/pair_state_manager');
+const PairStateExecution = require('./pairs/pair_state_execution');
+const PairConfig = require('./pairs/pair_config');
+const SystemUtil = require('./system/system_util');
 const TechnicalAnalysisValidator = require('../utils/technical_analysis_validator');
 const WinstonSqliteTransport = require('../utils/winston_sqlite_transport');
 const LogsHttp = require('./system/logs_http');
-const LogsRepository = require('../modules/repository/logs_repository');
-const TickerLogRepository = require('../modules/repository/ticker_log_repository');
-const TickerRepository = require('../modules/repository/ticker_repository');
-const CandlestickResample = require('../modules/system/candlestick_resample');
+const LogsRepository = require('./repository/logs_repository');
+const TickerLogRepository = require('./repository/ticker_log_repository');
+const TickerRepository = require('./repository/ticker_repository');
+const CandlestickResample = require('./system/candlestick_resample');
 const RequestClient = require('../utils/request_client');
 const Throttler = require('../utils/throttler');
 const Queue = require('../utils/queue');
@@ -63,11 +63,11 @@ const Noop = require('../exchange/noop');
 const Bybit = require('../exchange/bybit');
 const FTX = require('../exchange/ftx');
 
-const ExchangeCandleCombine = require('../modules/exchange/exchange_candle_combine');
-const CandleExportHttp = require('../modules/system/candle_export_http');
-const CandleImporter = require('../modules/system/candle_importer');
+const ExchangeCandleCombine = require('./exchange/exchange_candle_combine');
+const CandleExportHttp = require('./system/candle_export_http');
+const CandleImporter = require('./system/candle_importer');
 
-const OrdersHttp = require('../modules/orders/orders_http');
+const OrdersHttp = require('./orders/orders_http');
 
 let db;
 let instances;
@@ -126,6 +126,7 @@ module.exports = {
     parameters.projectDir = projectDir;
 
     try {
+      // eslint-disable-next-line import/no-dynamic-require
       instances = require(`${parameters.projectDir}/instance`);
     } catch (e) {
       throw new Error(`Invalid instance.js file. Please check: ${String(e)}`);
@@ -172,7 +173,12 @@ module.exports = {
       return backtest;
     }
 
-    return (backtest = new Backtest(this.getInstances(), this.getStrategyManager(), this.getExchangeCandleCombine(), parameters.projectDir));
+    return (backtest = new Backtest(
+      this.getInstances(),
+      this.getStrategyManager(),
+      this.getExchangeCandleCombine(),
+      parameters.projectDir
+    ));
   },
 
   getStopLossCalculator: function() {
@@ -319,7 +325,7 @@ module.exports = {
   getNotifier: function() {
     const notifiers = [];
 
-    const config = this.getConfig();
+    config = this.getConfig();
 
     const slack = _.get(config, 'notify.slack');
     if (slack && slack.webhook && slack.webhook.length > 0) {
@@ -678,7 +684,7 @@ module.exports = {
       this.getLogsRepository(),
       this.getTickerLogRepository(),
       this.getExchangePositionWatcher(),
-      this.getPairStateManager(),
+      this.getPairStateManager()
     );
   },
 
@@ -689,7 +695,7 @@ module.exports = {
   createMailer: function() {
     const mail = require('nodemailer');
 
-    const config = this.getConfig();
+    config = this.getConfig();
 
     return mail.createTransport(
       `smtps://${config.notify.mail.username}:${config.notify.mail.password}@${config.notify.mail.server}:${config
@@ -702,12 +708,12 @@ module.exports = {
 
   createTelegram: function() {
     const Telegraf = require('telegraf');
-    const config = this.getConfig();
+    config = this.getConfig();
     const { token } = config.notify.telegram;
 
     if (!token) {
       console.log('Telegram: No api token given');
-      return;
+      return null;
     }
 
     return new Telegraf(token);

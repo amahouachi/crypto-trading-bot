@@ -118,7 +118,7 @@ module.exports = class Http {
     app.get('/', async (req, res) => {
       res.render(
         '../templates/base.html.twig',
-        await ta.getTaForPeriods(this.systemUtil.getConfig('dashboard.periods', ['15m', '1h']))
+        await ta.getTaForPeriods(this.systemUtil.getConfig('dashboard.periods', ['4h', '1d']))
       );
     });
 

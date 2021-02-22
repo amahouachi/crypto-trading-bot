@@ -2,6 +2,8 @@ const BinanceClient = require('binance-api-node').default;
 
 const moment = require('moment');
 const _ = require('lodash');
+const querystring = require('querystring');
+const Candlestick = require('../dict/candlestick');
 const ExchangeCandlestick = require('../dict/exchange_candlestick');
 const Ticker = require('../dict/ticker');
 const TickerEvent = require('../event/ticker_event');
@@ -753,5 +755,20 @@ module.exports = class Binance {
 
   isInverseSymbol(symbol) {
     return false;
+  }
+
+  async backfill(symbol, period, start) {
+    const startTime= moment(start).valueOf();
+    const candles = await new BinanceClient().candles({ symbol, limit: 1000, interval: period, startTime });
+    return candles.map(candle => {
+      return new Candlestick(
+        Math.floor((candle.closeTime + 1) / 1000),
+        candle.open,
+        candle.high,
+        candle.low,
+        candle.close,
+        candle.volume
+      );
+    });
   }
 };

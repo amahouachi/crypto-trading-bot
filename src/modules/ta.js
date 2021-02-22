@@ -9,6 +9,21 @@ module.exports = class Ta {
     this.tickers = tickers;
   }
 
+  periodToMinutes(period){
+    switch (period) {
+      case '15m':
+        return 15;
+      case '1h':
+        return 60;
+      case '4h':
+        return 4*60;
+      case '1d':
+        return 24*60;
+      default:
+        return 1;
+    }
+  }
+
   getTaForPeriods(periods) {
     return new Promise(resolve => {
       const promises = [];
@@ -27,7 +42,7 @@ module.exports = class Ta {
                 symbol.exchange,
                 symbol.symbol,
                 period,
-                200
+                26
               );
 
               if (candles.length === 0) {
@@ -103,14 +118,7 @@ module.exports = class Ta {
               const number = ta.getCrossedSince(r.map(v => v.histogram));
 
               if (number) {
-                let multiplicator = 1;
-                if (v.period == '1h') {
-                  multiplicator = 60;
-                } else if (v.period == '15m') {
-                  multiplicator = 15;
-                }
-
-                values[key].crossed = number * multiplicator;
+                values[key].crossed = number * this.periodToMinutes(v.period);
                 values[key].crossed_index = number;
               }
             } else if (key == 'ao') {
@@ -121,14 +129,7 @@ module.exports = class Ta {
               const number = ta.getCrossedSince(r);
 
               if (number) {
-                let multiplicator = 1;
-                if (v.period == '1h') {
-                  multiplicator = 60;
-                } else if (v.period == '15m') {
-                  multiplicator = 15;
-                }
-
-                values[key].crossed = number * multiplicator;
+                values[key].crossed = number * this.periodToMinutes(v.period);
                 values[key].crossed_index = number;
               }
             } else if (key == 'bollinger_bands') {
@@ -141,8 +142,8 @@ module.exports = class Ta {
                     ) * 100
                   : null;
             } else if (
-              key == 'ema_200' ||
-              key == 'ema_55' ||
+              key == 'ema_21' ||
+              key == 'ema_9' ||
               key == 'cci' ||
               key == 'rsi' ||
               key == 'ao' ||

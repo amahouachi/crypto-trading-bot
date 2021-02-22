@@ -94,8 +94,8 @@ module.exports = class Backtest {
       };
 
       const end = moment().unix();
+      const strategyManager = new StrategyManager({}, mockedRepository, {}, this.projectDir);
       while (current < end) {
-        const strategyManager = new StrategyManager({}, mockedRepository, {}, this.projectDir);
 
         const item = await strategyManager.executeStrategyBacktest(
           strategy,

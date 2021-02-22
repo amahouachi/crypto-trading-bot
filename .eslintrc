@@ -11,7 +11,7 @@
     "ecmaVersion": 2017
   },
   "rules": {
-    "prettier/prettier": "error",
+    "prettier/prettier": "off",
     "no-unused-vars": "warn",
     "no-console": "off",
     "func-names": "off",
@@ -19,6 +19,10 @@
     "object-shorthand": "off",
     "class-methods-use-this": "off",
     "no-continue": "off",
-    "no-await-in-loop": "warn"
+    "no-await-in-loop": "warn",
+    "no-param-reassign": "off",
+    "global-require": "off",
+    "no-return-assign": "off",
+    "array-callback-return": "off"
   }
 }

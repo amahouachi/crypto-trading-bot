@@ -39,9 +39,9 @@
                                         <th scope="col" style="border-top-width: 1px">24h</th>
 
                                         {% for period in periods %}
-                                            <th class="text-uppercase" scope="col" data-toggle="tooltip" title="Trend Direction (ema 55 / ema 200)">T</th>
-                                            <th class="text-uppercase" scope="col">s200/50</th>
-                                            <th class="text-uppercase" scope="col">e200/55</th>
+                                            <th class="text-uppercase" scope="col" data-toggle="tooltip" title="Trend Direction (ema 9 / sma 21)">T</th>
+                                            <th class="text-uppercase" scope="col">s21/9</th>
+                                            <th class="text-uppercase" scope="col">e21/9</th>
                                             <th class="text-uppercase" scope="col">rsi</th>
                                             <th class="text-uppercase" scope="col">cci</th>
                                             <th class="text-uppercase" scope="col">srsi</th>
@@ -63,14 +63,14 @@
 
                                             {% for period in periods %}
                                                 {% set ta = row.ta[period] %}
-                                                <td class="period-start {{ ta.ema_55.value > ta.ema_200.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ ta.ema_55.value > ta.ema_200.value ? 'fa-arrow-alt-circle-up' : 'fa-arrow-alt-circle-down' }}"></i></td>
+                                                <td class="period-start {{ ta.ema_9.value > ta.sma_21.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ ta.ema_9.value > ta.ema_21.value ? 'fa-arrow-alt-circle-up' : 'fa-arrow-alt-circle-down' }}"></i></td>
                                                 <td>
-                                                    <span data-toggle="tooltip" title="{{ ta.sma_200.value|price_format }}" class="{{ row.ticker.bid > ta.sma_200.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ row.ticker.bid > ta.sma_200.value ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i></span>
-                                                    <span data-toggle="tooltip" title="{{ ta.sma_50.value|price_format }}"  class="{{ row.ticker.bid > ta.sma_50.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ row.ticker.bid > ta.sma_50.value ? 'fa-arrow-up' : 'fa-arrow-down' }}" style="font-size:0.65em"></i></span>
+                                                    <span data-toggle="tooltip" title="{{ ta.sma_21.value|price_format }}" class="{{ row.ticker.bid > ta.sma_21.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ row.ticker.bid > ta.sma_21.value ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i></span>
+                                                    <span data-toggle="tooltip" title="{{ ta.sma_9.value|price_format }}"  class="{{ row.ticker.bid > ta.sma_9.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ row.ticker.bid > ta.sma_9.value ? 'fa-arrow-up' : 'fa-arrow-down' }}" style="font-size:0.65em"></i></span>
                                                 </td>
                                                 <td>
-                                                    <span data-toggle="tooltip" title="{{ ta.ema_200.value|price_format }}"  class="{{ row.ticker.bid > ta.ema_200.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ row.ticker.bid > ta.ema_200.value ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i></span>
-                                                    <span data-toggle="tooltip" title="{{ ta.ema_55.value|price_format }}"  class="{{ row.ticker.bid > ta.ema_55.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ row.ticker.bid > ta.ema_55.value ? 'fa-arrow-up' : 'fa-arrow-down' }}" style="font-size:0.65em"></i></span>
+                                                    <span data-toggle="tooltip" title="{{ ta.ema_21.value|price_format }}"  class="{{ row.ticker.bid > ta.ema_21.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ row.ticker.bid > ta.ema_21.value ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i></span>
+                                                    <span data-toggle="tooltip" title="{{ ta.ema_9.value|price_format }}"  class="{{ row.ticker.bid > ta.ema_9.value ? 'text-success' : 'text-danger' }}"><i class="fas {{ row.ticker.bid > ta.ema_9.value ? 'fa-arrow-up' : 'fa-arrow-down' }}" style="font-size:0.65em"></i></span>
                                                 </td>
                                                 <td class="
                                                     {% if ta.rsi.value >= 80 or ta.rsi.value <= 20 %}font-weight-bold {% endif %}

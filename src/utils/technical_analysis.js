@@ -57,10 +57,10 @@ module.exports = {
     return new Promise(resolve => {
 
       const indicators = new IndicatorBuilder();
-      indicators.add('sma_200', 'sma', undefined, { length: 200 });
-      indicators.add('sma_50', 'sma', undefined, { length: 50 });
-      indicators.add('ema_55', 'ema', undefined, { length: 55 });
-      indicators.add('ema_200', 'ema', undefined, { length: 200 });
+      indicators.add('sma_21', 'sma', undefined, { length: 21 });
+      indicators.add('sma_9', 'sma', undefined, { length: 9 });
+      indicators.add('ema_9', 'ema', undefined, { length: 9 });
+      indicators.add('ema_21', 'ema', undefined, { length: 21 });
       indicators.add('rsi', 'rsi', undefined, { length: 14 });
       indicators.add('cci', 'cci', undefined, { length: 20 });
       indicators.add('ao', 'ao');
