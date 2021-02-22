@@ -81,7 +81,7 @@
     "url": "https://github.com/Haehnchen/crypto-trading-bot.git"
   },
   "scripts": {
-    "start": "node index.js trade",
+    "start": "NODE_ENV=development node index.js trade",
     "postinstall": "patch-package",
     "test": "mocha 'test/**/*.test.js'",
     "setup": "pm2 deploy ecosystem.config.js production setup",
