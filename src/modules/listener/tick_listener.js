@@ -220,7 +220,7 @@ module.exports = class TickListener {
           if (strategy.interval) {
             myInterval = strategy.interval;
           } else {
-            const strategyInstance = me.strategyManager.findStrategy(strategy.strategy);
+            const strategyInstance = me.strategyManager.findStrategy(strategy.strategy, symbol.exchange, symbol.symbol);
             if (typeof strategyInstance.getTickPeriod === 'function') {
               myInterval = strategyInstance.getTickPeriod();
             }

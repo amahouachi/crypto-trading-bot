@@ -89,7 +89,11 @@ module.exports = {
       .map(indicator => {
 
         const { indicator: indicatorName, source } = indicator;
-        
+
+        if(indicatorName === 'candles'){
+          return {};
+        }
+
         // Extract source from candle if it's candle data
         const sourceData = source in results.candles[0] ? results.candles.map(v => v[source]) : results[source];
 

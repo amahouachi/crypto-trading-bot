@@ -18,12 +18,20 @@ module.exports = class StrategyManager {
     this.projectDir = projectDir;
 
     this.logger = logger;
-    this.strategies = undefined;
+    this.strategies = {};
   }
 
-  getStrategies() {
-    if (typeof this.strategies !== 'undefined') {
-      return this.strategies;
+  getStrategies(exchange= undefined, symbol= undefined) {
+    let key;
+    if(exchange && symbol){
+      key= `${exchange}.${symbol}`;
+    }else{
+      if(Object.keys(this.strategies).length>0){
+        key= Object.keys(this.strategies)[0];
+      }
+    }
+    if (typeof this.strategies[key] !== 'undefined') {
+      return this.strategies[key];
     }
 
     const strategies = [];
@@ -62,11 +70,11 @@ module.exports = class StrategyManager {
       });
     });
 
-    return (this.strategies = strategies);
+    return (this.strategies[key] = strategies);
   }
 
-  findStrategy(strategyName) {
-    return this.getStrategies().find(strategy => strategy.getName() === strategyName);
+  findStrategy(strategyName, exchange, symbol) {
+    return this.getStrategies(exchange, symbol).find(strategy => strategy.getName() === strategyName);
   }
 
   /**
@@ -79,7 +87,8 @@ module.exports = class StrategyManager {
    * @returns {Promise<SignalResult|undefined>}
    */
   async executeStrategy(strategyName, context, exchange, symbol, options) {
-    const results = await this.getTaResult(strategyName, exchange, symbol, options, true);
+    const strategy = this.findStrategy(strategyName, exchange, symbol);
+    const results = await this.getTaResult(strategy, exchange, symbol, options, true);
     if (!results || Object.keys(results).length === 0) {
       return undefined;
     }
@@ -89,7 +98,6 @@ module.exports = class StrategyManager {
 
     const indicatorPeriod = new IndicatorPeriod(context, results);
 
-    const strategy = this.findStrategy(strategyName);
 
     const strategyResult = await strategy.period(indicatorPeriod, options);
     if (typeof strategyResult !== 'undefined' && !(strategyResult instanceof SignalResult)) {
@@ -109,7 +117,8 @@ module.exports = class StrategyManager {
    * @returns {Promise<array>}
    */
   async executeStrategyBacktest(strategyName, exchange, symbol, options, lastSignal, lastSignalEntry) {
-    const results = await this.getTaResult(strategyName, exchange, symbol, options);
+    const strategy = this.findStrategy(strategyName, exchange, symbol);
+    const results = await this.getTaResult(strategy, exchange, symbol, options);
     if (!results || Object.keys(results).length === 0) {
       return {};
     }
@@ -142,7 +151,6 @@ module.exports = class StrategyManager {
 
     const indicatorPeriod = new IndicatorPeriod(context, results);
 
-    const strategy = this.getStrategies().find(strategy => strategy.getName() === strategyName);
     const strategyResult = await strategy.period(indicatorPeriod, options);
 
     if (typeof strategyResult !== 'undefined' && !(strategyResult instanceof SignalResult)) {
@@ -161,16 +169,8 @@ module.exports = class StrategyManager {
     return result;
   }
 
-  async getTaResult(strategyName, exchange, symbol, options, validateLookbacks = false) {
+  async getTaResult(strategy, exchange, symbol, options, validateLookbacks = false) {
     options = options || {};
-
-    const strategy = this.getStrategies().find(strategy => {
-      return strategy.getName() === strategyName;
-    });
-
-    if (!strategy) {
-      throw `invalid strategy: ${strategy}`;
-    }
 
     const indicatorBuilder = new IndicatorBuilder();
     strategy.buildIndicator(indicatorBuilder, options);
@@ -227,7 +227,7 @@ module.exports = class StrategyManager {
           !this.technicalAnalysisValidator.isValidCandleStickLookback(lookbacks[exchange].slice(), period)
         ) {
           this.logger.info(
-            `Strategy skipped: outdated candle sticks: ${JSON.stringify([period, strategyName, exchange, symbol])}`
+            `Strategy skipped: outdated candle sticks: ${JSON.stringify([period, strategy.getName(), exchange, symbol])}`
           );
 
           // stop current run
@@ -325,14 +325,8 @@ module.exports = class StrategyManager {
     });
   }
 
-  getStrategyNames() {
-    return this.getStrategies().map(strategy => strategy.getName());
-  }
-
   getBacktestColumns(strategyName) {
-    const strategy = this.getStrategies().find(strategy => {
-      return strategy.getName() === strategyName;
-    });
+    const strategy = this.findStrategy(strategyName);
 
     if (!strategy) {
       return [];
